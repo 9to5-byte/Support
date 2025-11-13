@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Q&A System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .project-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .project-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 3px solid transparent;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .project-card.selected {
+            background: white;
+            color: #667eea;
+            border-color: #667eea;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result.active {
+            display: block;
+        }
+
+        .result h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .answer {
+            color: #444;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            font-size: 1.05em;
+        }
+
+        .sources {
+            margin-top: 20px;
+        }
+
+        .sources h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .sources a {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.3s ease;
+        }
+
+        .sources a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .error {
+            background: #fee;
+            border-left-color: #f44;
+        }
+
+        .error h2 {
+            color: #c33;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Support Q&A System</h1>
+        <p class="subtitle">Ask questions about your classified documents</p>
+
+        <div class="form-group">
+            <label>Select Project:</label>
+            <div class="project-selector">
+                <div class="project-card" data-project="dependq">DependQ</div>
+                <div class="project-card" data-project="revenue">Revenue</div>
+                <div class="project-card" data-project="regard">Regard</div>
+                <div class="project-card" data-project="hubble">Hubble</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="question">Your Question:</label>
+            <textarea
+                id="question"
+                placeholder="Enter your question here..."
+                rows="4"
+            ></textarea>
+        </div>
+
+        <button class="btn-submit" onclick="submitQuestion()">Ask Question</button>
+
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Processing your question...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        let selectedProject = null;
+
+        // Handle project selection
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.project-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedProject = this.dataset.project;
+            });
+        });
+
+        // Handle Enter key in textarea (Ctrl+Enter or Cmd+Enter to submit)
+        document.getElementById('question').addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                submitQuestion();
+            }
+        });
+
+        async function submitQuestion() {
+            const question = document.getElementById('question').value.trim();
+            const resultDiv = document.getElementById('result');
+            const loading = document.querySelector('.loading');
+            const submitBtn = document.querySelector('.btn-submit');
+
+            // Validation
+            if (!selectedProject) {
+                alert('Please select a project first!');
+                return;
+            }
+
+            if (!question) {
+                alert('Please enter a question!');
+                return;
+            }
+
+            // Show loading state
+            resultDiv.classList.remove('active');
+            loading.classList.add('active');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        project: selectedProject,
+                        question: question
+                    })
+                });
+
+                const data = await response.json();
+
+                // Hide loading
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+
+                if (data.error) {
+                    // Show error
+                    resultDiv.className = 'result error active';
+                    resultDiv.innerHTML = `
+                        <h2>Error</h2>
+                        <p class="answer">${data.error}</p>
+                    `;
+                } else {
+                    // Show result
+                    resultDiv.className = 'result active';
+                    let html = `
+                        <h2>Answer</h2>
+                        <div class="answer">${data.answer}</div>
+                    `;
+
+                    if (data.sources && data.sources.length > 0) {
+                        html += `
+                            <div class="sources">
+                                <h3>Sources:</h3>
+                                ${data.sources.map((url, i) =>
+                                    `<a href="${url}" target="_blank">${i + 1}. ${url}</a>`
+                                ).join('')}
+                            </div>
+                        `;
+                    }
+
+                    resultDiv.innerHTML = html;
+                }
+
+                // Scroll to result
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } catch (error) {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+                resultDiv.className = 'result error active';
+                resultDiv.innerHTML = `
+                    <h2>Error</h2>
+                    <p class="answer">Failed to get answer: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
