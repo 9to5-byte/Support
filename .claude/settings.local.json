@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m venv:*)",
+      "Bash(.venvScriptspython.exe -m pip install --upgrade pip)",
+      "Bash(.venvScriptspython.exe -m pip install -r requirements.txt)",
+      "Bash(./venv/Scripts/python.exe -m pip:*)",
+      "Bash(./venv/Scripts/python.exe -m pip install:*)",
+      "Bash(dir:*)",
+      "Bash(nul)",
+      "Bash(ollama:*)",
+      "Bash(winget install:*)",
+      "Bash(where:*)",
+      "Bash(\"$LOCALAPPDATA/Programs/Ollama/ollama.exe\" serve)",
+      "Bash(\"$LOCALAPPDATA/Programs/Ollama/ollama.exe\" pull bge-m3)",
+      "Bash(\"$LOCALAPPDATA/Programs/Ollama/ollama.exe\" pull llama2:13b-chat)",
+      "Bash(\"$LOCALAPPDATA/Programs/Ollama/ollama.exe\" list)",
+      "Bash(./venv/Scripts/python.exe:*)",
+      "Bash(../venv/Scripts/python.exe:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell.exe -Command \"Stop-Process -Name ollama -Force -ErrorAction SilentlyContinue; Write-Host ''Ollama stopped''\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
