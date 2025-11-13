@@ -151,6 +151,71 @@ def dedupe_by_source(hits: list[dict], per_source_cap: int = 2) -> list[dict]:
             bucket[src] = n + 1
     return out
 
+def ask_question(project: str, question: str, topk: int = 8, per_source_cap: int = 2) -> dict:
+    """
+    Ask a question and get an answer with sources.
+
+    Returns:
+        dict with keys: answer, sources (list of URLs), error (if any)
+    """
+    try:
+        if project not in PROJECTS:
+            return {"error": f"Unknown project: {project}"}
+
+        idxdir = PROJECTS[project]["index_dir"]
+        ensure_files(idxdir)
+        index, corpus = load_index_and_corpus(idxdir)
+
+        logging.info(f"Embedding query with '{EMBED_MODEL}' via Ollama…")
+        qvec = ollama_embed_texts([question])
+
+        logging.info(f"Searching FAISS ({index.ntotal} vectors)…")
+        distances, indices = search(index, qvec, topk)
+
+        # Collect hits
+        hits = []
+        for pos in indices[0]:
+            if pos < 0 or pos >= len(corpus):
+                continue
+            rec = corpus[pos]
+            hits.append({
+                "id": rec.get("id"),
+                "file": rec.get("file"),
+                "title": rec.get("title"),
+                "headings": rec.get("headings"),
+                "text": rec.get("text")
+            })
+
+        # Deduplicate
+        hits = dedupe_by_source(hits, per_source_cap=per_source_cap)
+        if not hits:
+            return {"answer": "No relevant context found.", "sources": []}
+
+        # Build prompt for LLM
+        prompt = build_prompt(question, hits)
+
+        logging.info(f"Generating answer with '{LLM_MODEL}' via Ollama…")
+        answer = ollama_generate(prompt)
+
+        # Compose source URL list from used files
+        used_files = []
+        seen = set()
+        for h in hits:
+            f = h.get("file")
+            if f and f not in seen:
+                seen.add(f)
+                used_files.append(f)
+
+        urls = [make_url(project, f) for f in used_files]
+
+        return {
+            "answer": answer.strip(),
+            "sources": urls
+        }
+    except Exception as e:
+        logging.error(f"Error in ask_question: {e}")
+        return {"error": str(e)}
+
 # ---------- main ----------
 def main():
     ap = argparse.ArgumentParser(description="Ask questions against project docs (FAISS + Ollama).")
@@ -165,58 +230,18 @@ def main():
     args = ap.parse_args()
 
     project = "dependq" if args.dependq else "revenue" if args.revenue else "regard" if args.regard else "hubble"
-    idxdir = PROJECTS[project]["index_dir"]
 
-    ensure_files(idxdir)
-    index, corpus = load_index_and_corpus(idxdir)
+    result = ask_question(project, args.question, topk=args.topk, per_source_cap=args.per_source_cap)
 
-    logging.info(f"Embedding query with '{EMBED_MODEL}' via Ollama…")
-    qvec = ollama_embed_texts([args.question])  # shape (1, dim)
+    if "error" in result:
+        print(f"Error: {result['error']}")
+        sys.exit(1)
 
-    logging.info(f"Searching FAISS ({index.ntotal} vectors)…")
-    distances, indices = search(index, qvec, args.topk)
-
-    # Collect hits
-    hits = []
-    for pos in indices[0]:
-        if pos < 0 or pos >= len(corpus):
-            continue
-        rec = corpus[pos]
-        hits.append({
-            "id": rec.get("id"),
-            "file": rec.get("file"),
-            "title": rec.get("title"),
-            "headings": rec.get("headings"),
-            "text": rec.get("text")
-        })
-    # Deduplicate
-    hits = dedupe_by_source(hits, per_source_cap=args.per_source_cap)
-    if not hits:
-        print("No relevant context found.")
-        sys.exit(0)
-
-    # Build prompt for LLM
-    prompt = build_prompt(args.question, hits)
-
-    logging.info(f"Generating answer with '{LLM_MODEL}' via Ollama…")
-    answer = ollama_generate(prompt)
-
-    # Compose source URL list from used files
-    used_files = []
-    seen = set()
-    for h in hits:
-        f = h.get("file")
-        if f and f not in seen:
-            seen.add(f)
-            used_files.append(f)
-
-    urls = [make_url(project, f) for f in used_files]
-    sources_block = "\n".join([f"{i+1}. {u}" for i, u in enumerate(urls)])
-
-    print("\n" + answer.strip())
-    if urls:
+    print("\n" + result["answer"])
+    if result.get("sources"):
         print("\nSources:")
-        print(sources_block)
+        for i, url in enumerate(result["sources"], 1):
+            print(f"{i}. {url}")
 
 if __name__ == "__main__":
     try:
