@@ -1,0 +1,16 @@
+.venv/
+
+__pycache__/
+
+SUPPORT/index/
+
+SUPPORT/docs/**/raw/
+SUPPORT/docs/**/converted/
+SUPPORT/docs/**/md/
+cookies.txt
+last_prompt.txt
+
+docs_SSMS_before_convert/
+docs_SSMS/
+
+cookies.txt 

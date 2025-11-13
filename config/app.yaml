@@ -1,0 +1,15 @@
+ollama:
+  url: "http://127.0.0.1:11434"
+  llm_model: "llama2:13b-chat"
+  embed_model: "bge-m3"
+paths:
+  index_dir: "SUPPORT/index"  
+retrieval:
+  k: 12                    # how many chunks to retrieve
+  chunk_tokens: 500
+  chunk_overlap: 100
+  per_source_cap: 6        # cap chunks per file
+  auto_stop_top: 50        # how many top terms to treat as stopwords
+  coverage_threshold: 0.2  # minimum fraction of key terms a doc must hit
+  bm25_k1: 1.2             # BM25 tuning
+  bm25_b: 0.65
