@@ -1,5 +1,5 @@
 .venv/
-
+.env
 __pycache__/
 
 SUPPORT/index/
@@ -18,5 +18,5 @@ cookies.txt
 app.log
 
 
-
+nul
 
