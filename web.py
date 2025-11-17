@@ -213,8 +213,8 @@ def ask():
         if not data:
             return jsonify({"error": "Invalid JSON data"}), 400
 
-        project = data.get("project", "").strip()
-        question = data.get("question", "").strip()
+        project = str(data.get("project", "")).strip()
+        question = str(data.get("question", "")).strip()
 
         # Validate project
         valid, error = validate_project(project)

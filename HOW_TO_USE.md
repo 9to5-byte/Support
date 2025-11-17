@@ -16,8 +16,7 @@ C:\code\Support\
 │   ├── index/                     # Generated FAISS indices (auto-created)
 │   ├── build/                     # Index builder scripts
 │   ├── templates/                 # Web UI templates
-│   ├── ask.py                     # CLI query tool
-│   └── web.py                     # Web interface
+│   └── ask.py                     # CLI query tool
 └── requirements.txt
 ```
 
@@ -114,8 +113,8 @@ python SUPPORT\build\build_regard.py
 cd C:\code\Support
 .\venv\Scripts\activate
 
-# Start the web server
-python SUPPORT\web.py
+# Start the web server (production version)
+python web.py
 ```
 
 **Output:**
@@ -152,7 +151,7 @@ When you add, remove, or update markdown files:
    ```
 3. **Restart the web server**:
    ```bash
-   python SUPPORT\web.py
+   python web.py
    ```
 
 ---
@@ -178,7 +177,7 @@ python SUPPORT\ask.py --regard "What are the GDPR compliance features?"
 
 ### Custom Ollama Settings
 
-Edit `SUPPORT/web.py` or `SUPPORT/ask.py` to customize:
+Edit `SUPPORT/ask.py` to customize:
 
 ```python
 OLLAMA_URL = "http://127.0.0.1:11434"  # Ollama server URL
@@ -250,7 +249,7 @@ cd C:\code\Support
 python SUPPORT\build\build_dependq.py
 
 # 4. Start web interface
-python SUPPORT\web.py
+python web.py
 
 # 5. Open browser
 # Go to http://localhost:5000

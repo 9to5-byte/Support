@@ -28,7 +28,8 @@
       "Bash(.\\venv\\Scripts\\python.exe:*)",
       "Bash(rm:*)",
       "WebFetch(domain:www.percival.co.uk)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(.\\venv\\Scripts\\python.exe -m pip:*)"
     ],
     "deny": [],
     "ask": []
