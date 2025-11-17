@@ -245,7 +245,7 @@
             ></textarea>
         </div>
 
-        <button class="btn-submit" onclick="submitQuestion()">Ask Question</button>
+        <button class="btn-submit">Ask Question</button>
 
         <div class="loading">
             <div class="spinner"></div>
@@ -255,107 +255,6 @@
         <div class="result" id="result"></div>
     </div>
 
-    <script>
-        let selectedProject = null;
-
-        // Handle project selection
-        document.querySelectorAll('.project-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.project-card').forEach(c => c.classList.remove('selected'));
-                this.classList.add('selected');
-                selectedProject = this.dataset.project;
-            });
-        });
-
-        // Handle Enter key in textarea (Ctrl+Enter or Cmd+Enter to submit)
-        document.getElementById('question').addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                submitQuestion();
-            }
-        });
-
-        async function submitQuestion() {
-            const question = document.getElementById('question').value.trim();
-            const resultDiv = document.getElementById('result');
-            const loading = document.querySelector('.loading');
-            const submitBtn = document.querySelector('.btn-submit');
-
-            // Validation
-            if (!selectedProject) {
-                alert('Please select a project first!');
-                return;
-            }
-
-            if (!question) {
-                alert('Please enter a question!');
-                return;
-            }
-
-            // Show loading state
-            resultDiv.classList.remove('active');
-            loading.classList.add('active');
-            submitBtn.disabled = true;
-
-            try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        project: selectedProject,
-                        question: question
-                    })
-                });
-
-                const data = await response.json();
-
-                // Hide loading
-                loading.classList.remove('active');
-                submitBtn.disabled = false;
-
-                if (data.error) {
-                    // Show error
-                    resultDiv.className = 'result error active';
-                    resultDiv.innerHTML = `
-                        <h2>Error</h2>
-                        <p class="answer">${data.error}</p>
-                    `;
-                } else {
-                    // Show result
-                    resultDiv.className = 'result active';
-                    let html = `
-                        <h2>Answer</h2>
-                        <div class="answer">${data.answer}</div>
-                    `;
-
-                    if (data.sources && data.sources.length > 0) {
-                        html += `
-                            <div class="sources">
-                                <h3>Sources:</h3>
-                                ${data.sources.map((url, i) =>
-                                    `<a href="${url}" target="_blank">${i + 1}. ${url}</a>`
-                                ).join('')}
-                            </div>
-                        `;
-                    }
-
-                    resultDiv.innerHTML = html;
-                }
-
-                // Scroll to result
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-            } catch (error) {
-                loading.classList.remove('active');
-                submitBtn.disabled = false;
-                resultDiv.className = 'result error active';
-                resultDiv.innerHTML = `
-                    <h2>Error</h2>
-                    <p class="answer">Failed to get answer: ${error.message}</p>
-                `;
-            }
-        }
-    </script>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>
